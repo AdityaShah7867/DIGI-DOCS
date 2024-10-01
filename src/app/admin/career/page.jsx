@@ -1,7 +1,9 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 const CareerPage = () => {
+  const router = useRouter();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -46,6 +48,10 @@ const CareerPage = () => {
     setIsPopupOpen(false);
   };
 
+  const handleRowClick = (id) => {
+    router.push(`/admin/career/${id}`);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-4xl font-semibold mb-8 text-gray-900  pb-2 inline-block">
@@ -81,7 +87,8 @@ const CareerPage = () => {
             {openForms.map((form, index) => (
               <tr
                 key={form.id}
-                className="border-b border-gray-200 hover:bg-gray-50 transition duration-150"
+                className="border-b border-gray-200 hover:bg-gray-50 transition duration-150 cursor-pointer"
+                onClick={() => handleRowClick(form.id)}
               >
                 <td className="py-4 px-6 font-medium">{index + 1}</td>
                 <td className="py-4 px-6 font-medium">{form.title}</td>

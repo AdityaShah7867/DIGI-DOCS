@@ -1,8 +1,10 @@
 'use client'
 import React, { useState } from 'react';
 import { Search, Briefcase, Calendar, FileText, ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const JobListings = () => {
+  const router = useRouter();
   const initialJobs = [
     { id: 1, title: 'Software Engineer', lastDate: '2024-04-30', category: 'IT', link: '#', documents: 'Resume, Cover Letter', status: 'Open', publishDate: '2024-03-01' },
     { id: 2, title: 'Data Analyst', lastDate: '2024-05-15', category: 'Analytics', link: '#', documents: 'Resume, Portfolio', status: 'Open', publishDate: '2024-03-10' },
@@ -19,6 +21,10 @@ const JobListings = () => {
     job.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (filterCategory === 'All' || job.category === filterCategory)
   );
+
+  const handleJobClick = (jobId) => {
+    router.push(`/user/dashboard/careers/${jobId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -49,7 +55,11 @@ const JobListings = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredJobs.map((job) => (
-            <div key={job.id} className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+            <div 
+              key={job.id} 
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer"
+              onClick={() => job.status === 'Open' && handleJobClick(job.id)}
+            >
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
                 <h2 className="text-2xl font-semibold mb-2">{job.title}</h2>
                 <p className="text-blue-100 flex items-center">

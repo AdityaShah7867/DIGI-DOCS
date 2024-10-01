@@ -1,9 +1,11 @@
 'use client'
 import { useParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 const CareerDetailsPage = () => {
   const params = useParams();
+  const router = useRouter();
   const [careerDetails, setCareerDetails] = useState(null);
   const [candidates, setCandidates] = useState([]);
 
@@ -33,6 +35,10 @@ const CareerDetailsPage = () => {
 
     fetchData();
   }, [params.id]);
+
+  const handleCandidateClick = (candidateId, candidateName) => {
+    router.push(`/admin/career/${params.id}/${candidateName}`);
+  };
 
   if (!careerDetails) {
     return <div className="min-h-screen bg-white text-black flex items-center justify-center">Loading...</div>;
@@ -66,7 +72,12 @@ const CareerDetailsPage = () => {
         <tbody>
           {candidates.map(candidate => (
             <tr key={candidate.id}>
-              <td className="border border-gray-300 p-2">{candidate.name}</td>
+              <td 
+                className="border border-gray-300 p-2 cursor-pointer text-blue-600 hover:underline"
+                onClick={() => handleCandidateClick(candidate.id, candidate.name)}
+              >
+                {candidate.name}
+              </td>
               <td className="border border-gray-300 p-2">{candidate.email}</td>
               <td className="border border-gray-300 p-2">{candidate.appliedDate}</td>
             </tr>

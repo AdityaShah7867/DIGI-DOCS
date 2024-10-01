@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import UploadDocumentModal from './UploadDocumentModal'
+import { useRouter } from 'next/navigation'
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -10,11 +11,14 @@ const Dashboard = () => {
   // Add new state variables for document and application counts
   const [documentCount, setDocumentCount] = useState(0)
   const [applicationCount, setApplicationCount] = useState(0)
-
+const router = useRouter();
   useEffect(() => {
     fetchDocuments()
   }, [])
 
+const handleApply = () => {
+  router.push('/user/dashboard/careers')
+}
   const fetchDocuments = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/document/getAll', {
@@ -64,12 +68,18 @@ const Dashboard = () => {
         </div>
       </div>  
 
-      <div className="mb-4">
+      <div className="mb-4 flex space-x-4">
         <button
           onClick={() => setIsModalOpen(true)}
           className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
         >
           Upload New Document
+        </button>
+        <button
+          onClick={handleApply}
+          className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Apply to Open Postings
         </button>
       </div>
 
