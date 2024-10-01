@@ -1,31 +1,75 @@
 'use client'
-import { useParams } from 'next/navigation'
-import React, { useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 
 const Page = () => {
     const params = useParams()
     const [agreed, setAgreed] = useState(false)
+    const [careerForm, setCareerForm] = useState(null)
+    const [documents, setDocuments] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    // Sample document list (replace with actual data)
-    const documents = [
-        { name: 'Resume', available: true },
-        { name: 'Cover Letter', available: true },
-        { name: 'References', available: false },
-        { name: 'Portfolio', available: false },
-    ]
+    useEffect(() => {
+        const fetchCareerForm = async () => {
+            try {
+                const token = localStorage.getItem('token') // Assuming the token is stored in localStorage
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/getOne/${params.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+                setCareerForm(response.data.career)
+                
+                // Get available documents from localStorage
+                const availableDocuments = JSON.parse(localStorage.getItem('documentNames') || '[]')
+                
+                // Create documents array
+                const docList = response.data.career.documentName.map(docName => ({
+                    name: docName,
+                    available: availableDocuments.includes(docName)
+                }))
+                setDocuments(docList)
+            } catch (err) {
+                setError('Failed to fetch career form data')
+            } finally {
+                setLoading(false)
+            }
+        }
 
-    const handleSubmit = (e) => {
+        fetchCareerForm()
+    }, [params.id])
+
+    const handleSubmit = async (e) => {
         e.preventDefault()
-        // Handle form submission
-        console.log('Form submitted', { agreed, id: params.id })
+        setLoading(true)
+        try {
+            const token = localStorage.getItem('token')
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/apply/${params.id}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            if (response.status === 200) {
+                const router = useRouter()
+                router.push('/user/dashboard/careers')
+            }
+            // Handle successful submission (e.g., show success message, redirect)
+            console.log('Application submitted successfully')
+        } catch (err) {
+            setError('Failed to submit application')
+        } finally {
+            setLoading(false)
+        }
     }
+
+    if (loading) return <div>Loading...</div>
+    if (error) return <div>Error: {error}</div>
+
+    const allDocumentsAvailable = documents.every(doc => doc.available)
 
     return (
         <div className='min-h-screen bg-gray-100 text-gray-800 p-8 flex justify-center items-center'>
             <div className='max-w-2xl w-full bg-white p-8 rounded-lg shadow-lg'>
                 <h1 className='text-3xl font-bold mb-6 text-center text-blue-600'>Application Documents</h1>
                 <div className='mb-8'>
-                    <img src='https://adityadevappweb.s3.ap-south-1.amazonaws.com/Screenshot+2024-10-01+184158.png' alt='job' className='w-24 h-auto rounded-md' />
                     <h2 className='text-xl font-semibold mb-4'>Document Checklist</h2>
                     <ul className='space-y-3'>
                         {documents.map((doc, index) => (
@@ -59,10 +103,16 @@ const Page = () => {
                         className='w-full bg-blue-600 text-white px-6 py-3 rounded-md font-medium 
                                    hover:bg-blue-700 transition duration-300 ease-in-out disabled:opacity-50 
                                    disabled:cursor-not-allowed'
-                        disabled={!agreed}
+                        disabled={!agreed || !allDocumentsAvailable || loading}
                     >
-                        Submit Application
+                        {loading ? 'Submitting...' : 'Submit Application'}
                     </button>
+                    {error && <p className='text-red-500 text-sm text-center'>{error}</p>}
+                    {!allDocumentsAvailable && (
+                        <p className='text-red-500 text-sm text-center'>
+                            Please upload all required documents before submitting.
+                        </p>
+                    )}
                 </form>
             </div>
         </div>

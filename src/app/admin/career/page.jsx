@@ -1,5 +1,5 @@
-"use client";
-import React, { useState } from "react";
+'use client'
+import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 
 const CareerPage = () => {
@@ -9,52 +9,129 @@ const CareerPage = () => {
     title: "",
     lastDate: "",
     category: "",
-    link: "",
-    documents: "",
+    documents: [],
     status: "Open",
     publishDate: "",
   });
+  const [openForms, setOpenForms] = useState([]);
 
-  const openForms = [
-    {
-      id: 1,
-      title: "Job Application",
-      lastDate: "2023-12-31",
-      category: "Employment",
-      link: "https://example.com/job",
-      documents: "Resume, Cover Letter",
-      status: "Open",
-      publishDate: "2023-11-01",
-    },
-    {
-      id: 2,
-      title: "Internship Program",
-      lastDate: "2023-11-30",
-      category: "Internship",
-      link: "https://example.com/intern",
-      documents: "CV, Transcript",
-      status: "Open",
-      publishDate: "2023-10-15",
-    },
-  ];
+  useEffect(() => {
+    fetchForms();
+  }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const fetchForms = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/getAll`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setOpenForms(data.career);
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const documentOptions = [
+    "Aadhar Card",
+    "Pan Card",
+    "EBC Certificate",
+    "PWD Card",
+    "Passport",
+  ];
+
+  // Remove or comment out this reassignment:
+  // openForms = [
+  //   {
+  //     id: 1,
+  //     title: "Job Application",
+  //     // ... other properties ...
+  //   }
+  // ];
+
+  // If you need to set initial data, use setOpenForms instead:
+  // useEffect(() => {
+  //   setOpenForms([
+  //     {
+  //       id: 1,
+  //       title: "Job Application",
+  //       // ... other properties ...
+  //     }
+  //   ]);
+  // }, []);
+
+  const handleChange = (e) => {
+    if (e.target.name === 'documents') {
+      const updatedDocuments = [...formData.documents];
+      if (e.target.checked) {
+        updatedDocuments.push(e.target.value);
+      } else {
+        const index = updatedDocuments.indexOf(e.target.value);
+        if (index > -1) {
+          updatedDocuments.splice(index, 1);
+        }
+      }
+      setFormData({ ...formData, documents: updatedDocuments });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    await createNewForm(formData);
     setIsPopupOpen(false);
+    // Optionally, you can reset the form or fetch updated data here
   };
 
   const handleRowClick = (id) => {
     router.push(`/admin/career/${id}`);
   };
 
+  const createNewForm = async (data) => {
+    try {
+      const apiData = {
+        title: data.title,
+        last_date: data.lastDate,
+        category: data.category,
+        link: data.link,
+        status: data.status,
+        publish_date: data.publishDate,
+        documentName: data.documents,
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Form created successfully:', result);
+      // You can add a success message or redirect here
+    } catch (error) {
+      console.error('Error creating form:', error);
+      // You can add an error message here
+    }
+    await fetchForms(); // Refresh the list of forms
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-4xl font-semibold mb-8 text-gray-900  pb-2 inline-block">
+      <h1 className="text-4xl font-semibold mb-8 text-gray-900 pb-2 inline-block">
         Open Forms
       </h1>
 
@@ -75,7 +152,6 @@ const CareerPage = () => {
               <th className="py-4 px-6 text-left font-semibold">Title</th>
               <th className="py-4 px-6 text-left font-semibold">Last Date</th>
               <th className="py-4 px-6 text-left font-semibold">Category</th>
-              <th className="py-4 px-6 text-left font-semibold">Link</th>
               <th className="py-4 px-6 text-left font-semibold">Documents</th>
               <th className="py-4 px-6 text-left font-semibold">Status</th>
               <th className="py-4 px-6 text-left font-semibold">
@@ -86,31 +162,21 @@ const CareerPage = () => {
           <tbody className="text-gray-700 text-sm">
             {openForms.map((form, index) => (
               <tr
-                key={form.id}
+                key={form._id}
                 className="border-b border-gray-200 hover:bg-gray-50 transition duration-150 cursor-pointer"
-                onClick={() => handleRowClick(form.id)}
+                onClick={() => handleRowClick(form._id)}
               >
                 <td className="py-4 px-6 font-medium">{index + 1}</td>
                 <td className="py-4 px-6 font-medium">{form.title}</td>
-                <td className="py-4 px-6">{form.lastDate}</td>
+                <td className="py-4 px-6">{form.last_date}</td>
                 <td className="py-4 px-6">{form.category}</td>
-                <td className="py-4 px-6">
-                  <a
-                    href={form.link}
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Link
-                  </a>
-                </td>
-                <td className="py-4 px-6">{form.documents}</td>
+                <td className="py-4 px-6">{form.documentName.join(", ")}</td>
                 <td className="py-4 px-6">
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">
                     {form.status}
                   </span>
                 </td>
-                <td className="py-4 px-6">{form.publishDate}</td>
+                <td className="py-4 px-6">{form.publish_date}</td>
               </tr>
             ))}
           </tbody>
@@ -129,20 +195,42 @@ const CareerPage = () => {
                   <label className="block mb-2 text-sm font-semibold text-black capitalize">
                     {key.replace(/([A-Z])/g, " $1").trim()}
                   </label>
-                  <input
-                    type={
-                      key === "lastDate" || key === "publishDate"
-                        ? "date"
-                        : key === "status"
-                        ? "select"
-                        : "text"
-                    }
-                    name={key}
-                    value={formData[key]}
-                    onChange={handleChange}
-                    className="w-full border text-black border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
-                    required
-                  />
+                  {key === 'documents' ? (
+                    <div className="flex flex-wrap gap-2">
+                      {documentOptions.map((option) => (
+                        <div key={option} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            name={key}
+                            value={option}
+                            checked={formData.documents.includes(option)}
+                            onChange={handleChange}
+                            className="mr-2"
+                          />
+                          <span className="text-sm">{option}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : key === 'status' ? (
+                    <select
+                      name={key}
+                      value={formData[key]}
+                      onChange={handleChange}
+                      className="w-full border text-black border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
+                    >
+                      <option value="Open">Open</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+                  ) : (
+                    <input
+                      type={key === "lastDate" || key === "publishDate" ? "date" : "text"}
+                      name={key}
+                      value={formData[key]}
+                      onChange={handleChange}
+                      className="w-full border text-black border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
+                      required
+                    />
+                  )}
                 </div>
               ))}
               <div className="col-span-2 flex justify-end mt-6">

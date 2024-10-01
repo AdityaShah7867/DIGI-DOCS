@@ -10,27 +10,37 @@ const CareerDetailsPage = () => {
   const [candidates, setCandidates] = useState([]);
 
   useEffect(() => {
-    // Fetch career details and candidates data
-    // This is a mock implementation. Replace with actual API calls.
     const fetchData = async () => {
-      // Simulating API call delay  
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setCareerDetails({
-        title: "Software Engineer",
-        lastDate: "2023-12-31",
-        category: "Engineering",
-        link: "https://example.com/apply",
-        documents: ["Resume", "Cover Letter"],
-        status: "Open",
-        publishDate: "2023-06-01",
-      });
+      try {
+        const response = await fetch(`http://localhost:5000/api/careerForm/getOne/${params.id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
 
-      setCandidates([
-        { id: 1, name: "John Doe", email: "john@example.com", appliedDate: "2023-06-05" },
-        { id: 2, name: "Jane Smith", email: "jane@example.com", appliedDate: "2023-06-07" },
-        // Add more mock candidates as needed
-      ]);
+        const data = await response.json();
+        
+        if (data.message === "Career form retrieved successfully") {
+          setCareerDetails({
+            title: data.career.title,
+            lastDate: data.career.last_date,
+            category: data.career.category,
+            status: data.career.status,
+            publishDate: data.career.publish_date,
+            documents: data.career.documentName,
+          });
+          
+          // Note: The API response doesn't include applicants, so we'll keep the mock data for now
+          setCandidates([
+            { id: 1, name: "John Doe", email: "john@example.com", appliedDate: "2023-06-05" },
+            { id: 2, name: "Jane Smith", email: "jane@example.com", appliedDate: "2023-06-07" },
+          ]);
+        } else {
+          console.error("Failed to fetch career details");
+        }
+      } catch (error) {
+        console.error("Error fetching career details:", error);
+      }
     };
 
     fetchData();

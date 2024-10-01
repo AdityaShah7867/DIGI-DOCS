@@ -26,7 +26,7 @@ const Dashboard = () => {
 
   const fetchDocuments = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/document/getAll', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/getAll`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

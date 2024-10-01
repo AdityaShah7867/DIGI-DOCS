@@ -23,6 +23,9 @@ const Login = () => {
         const data = await response.json();
         toast.success('Login successful');
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('role', data.user.role);
+        localStorage.setItem('id', data.user.id);
         router.push('/user/dashboard');
       } else {
         const errorData = await response.json();

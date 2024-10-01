@@ -15,6 +15,7 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments, uploadedDocument
   const [documentType, setDocumentType] = useState('')
   const [documentValue, setDocumentValue] = useState('')
   const [file, setFile] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   // Filter out already uploaded document types
   const availableDocumentTypes = useMemo(() => {
@@ -29,9 +30,11 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments, uploadedDocument
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (file) {
+    if (file && !isLoading) {
+      setIsLoading(true)
       const formData = new FormData()
       formData.append('document', file)
+      formData.append('docType', documentType)
       formData.append('documentName', documentType)
       formData.append('value', documentValue)
 
@@ -46,6 +49,7 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments, uploadedDocument
 
         if (!response.ok) {
           toast.error(`Error uploading ${documentType}. Please try again.`)
+          setIsLoading(false)
           return
         }
 
@@ -55,13 +59,15 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments, uploadedDocument
         setDocumentType('')
         setDocumentValue('')
         setFile(null)
+        setIsLoading(false)
         onClose()
       } catch (error) {
         console.error('Error:', error)
-        alert(`An error occurred while uploading ${documentType}. Please try again.`)
+        toast.error(`An error occurred while uploading ${documentType}. Please try again.`)
+        setIsLoading(false)
       }
-    } else {
-      alert('Please select a file to upload.')
+    } else if (!file) {
+      toast.error('Please select a file to upload.')
     }
   }
 
@@ -137,14 +143,16 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments, uploadedDocument
           <div className="flex items-center justify-between">
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
             >
-              Upload
+              {isLoading ? 'Uploading...' : 'Upload'}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              disabled={isLoading}
             >
               Cancel
             </button>

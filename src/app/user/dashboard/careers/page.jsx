@@ -1,21 +1,51 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Briefcase, Calendar, FileText, ExternalLink } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const JobListings = () => {
   const router = useRouter();
-  const initialJobs = [
-    { id: 1, title: 'Software Engineer', lastDate: '2024-04-30', category: 'IT', link: '#', documents: 'Resume, Cover Letter', status: 'Open', publishDate: '2024-03-01' },
-    { id: 2, title: 'Data Analyst', lastDate: '2024-05-15', category: 'Analytics', link: '#', documents: 'Resume, Portfolio', status: 'Open', publishDate: '2024-03-10' },
-    { id: 3, title: 'UX Designer', lastDate: '2024-05-20', category: 'Design', link: '#', documents: 'Resume, Portfolio', status: 'Open', publishDate: '2024-03-15' },
-  ];
-
-  const [jobs, setJobs] = useState(initialJobs);
+  const [jobs, setJobs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('All');
+  const [userId, setUserId] = useState('');
 
-  const categories = ['All', ...new Set(initialJobs.map(job => job.category))];
+  useEffect(() => {
+    // Get user ID from localStorage
+    const storedUserId = localStorage.getItem('id');
+    setUserId(storedUserId);
+
+    const fetchJobs = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/careerForm/getAll', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const data = await response.json();
+        if (data.career) {
+          const formattedJobs = data.career.map(job => ({
+            id: job._id,
+            title: job.title,
+            lastDate: job.last_date,
+            category: job.category,
+            link: '#', // You might want to update this with a real link
+            documents: job.documentName.join(', '),
+            status: job.status,
+            publishDate: job.publish_date,
+            appliedStatus: job.applicants.includes(storedUserId) ? 'Applied' : 'Not Applied'
+          }));
+          setJobs(formattedJobs);
+        }
+      } catch (error) {
+        console.error('Error fetching jobs:', error);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
+  const categories = ['All', ...new Set(jobs.map(job => job.category))];
 
   const filteredJobs = jobs.filter(job => 
     job.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -57,8 +87,8 @@ const JobListings = () => {
           {filteredJobs.map((job) => (
             <div 
               key={job.id} 
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer"
-              onClick={() => job.status === 'Open' && handleJobClick(job.id)}
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg "
+              // onClick={() => job.status === 'Open' && handleJobClick(job.id)}
             >
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
                 <h2 className="text-2xl font-semibold mb-2">{job.title}</h2>
@@ -84,13 +114,19 @@ const JobListings = () => {
                   }`}>
                     {job.status}
                   </span>
-                  <a
-                    href={job.link}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300 flex items-center"
-                  >
-                    Apply Now
-                    <ExternalLink size={16} className="ml-2" />
-                  </a>
+                  {job.appliedStatus === 'Applied' ? (
+                    <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                      Applied
+                    </span>
+                  ) : (
+                    <a
+                      href={job.link}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300 flex items-center"
+                    >
+                      Apply Now
+                      <ExternalLink size={16} className="ml-2" />
+                    </a>
+                  )}
                 </div>
                 <p className="text-sm text-gray-500 mt-4">Published on {job.publishDate}</p>
               </div>
