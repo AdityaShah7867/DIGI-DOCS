@@ -100,8 +100,8 @@ const Page = () => {
       {previewDocument && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
           <div className='bg-white p-4 rounded-lg w-3/4 h-3/4'>
-            <h4 className='text-xl font-semibold mb-4'>{previewDocument.name}</h4>
-            <iframe src={previewDocument.url} className='w-full h-5/6' />
+            <h4 className='text-xl font-semibold mb-4'>{previewDocument.documentName}</h4>
+            <iframe src={previewDocument.documentUrl} className='w-full h-5/6' />
             <button
               onClick={() => setPreviewDocument(null)}
               className='mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition'

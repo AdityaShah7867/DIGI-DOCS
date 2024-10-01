@@ -60,8 +60,7 @@ const Page = () => {
         }
     }
 
-    if (loading) return <div>Loading...</div>
-    if (error) return <div>Error: {error}</div>
+    
 
     const allDocumentsAvailable = documents.every(doc => doc.available)
 

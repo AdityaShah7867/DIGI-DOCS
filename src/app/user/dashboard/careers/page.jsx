@@ -29,7 +29,6 @@ const JobListings = () => {
             title: job.title,
             lastDate: job.last_date,
             category: job.category,
-            link: '#', // You might want to update this with a real link
             documents: job.documentName.join(', '),
             status: job.status,
             publishDate: job.publish_date,
@@ -87,8 +86,8 @@ const JobListings = () => {
           {filteredJobs.map((job) => (
             <div 
               key={job.id} 
-              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg "
-              // onClick={() => job.status === 'Open' && handleJobClick(job.id)}
+              className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer"
+              onClick={() => job.status === 'Open' && handleJobClick(job.id)}
             >
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
                 <h2 className="text-2xl font-semibold mb-2">{job.title}</h2>

@@ -12,7 +12,7 @@ const CareerDetailsPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/careerForm/getOne/${params.id}`, {
+        const response = await fetch(`http://localhost:5000/api/careerForm/getSelectionStatus/${params.id}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -20,7 +20,7 @@ const CareerDetailsPage = () => {
 
         const data = await response.json();
         
-        if (data.message === "Career form retrieved successfully") {
+        if (data.career) {
           setCareerDetails({
             title: data.career.title,
             lastDate: data.career.last_date,
@@ -31,11 +31,12 @@ const CareerDetailsPage = () => {
           });
           
           // Map the applicants data from the API response
-          const mappedCandidates = data.career.applicants.map(applicant => ({
-            id: applicant._id,
-            name: applicant.name || applicant.email.split('@')[0], // Use email if name is not available
-            email: applicant.email,
-            appliedDate: new Date(applicant.createdAt).toLocaleDateString(),
+          const mappedCandidates = data.career.application.map(application => ({
+            id: application._id,
+            name: application.userId.email.split('@')[0], // Use email as name
+            email: application.userId.email,
+            appliedDate: new Date(application.appliedAt).toLocaleDateString(),
+            selectionStatus: application.selectionStatus,
           }));
           
           setCandidates(mappedCandidates);
@@ -81,6 +82,7 @@ const CareerDetailsPage = () => {
             <th className="border border-gray-300 p-2">Name</th>
             <th className="border border-gray-300 p-2">Email</th>
             <th className="border border-gray-300 p-2">Applied Date</th>
+            <th className="border border-gray-300 p-2">Selection Status</th>
           </tr>
         </thead>
         <tbody>
@@ -94,6 +96,7 @@ const CareerDetailsPage = () => {
               </td>
               <td className="border border-gray-300 p-2">{candidate.email}</td>
               <td className="border border-gray-300 p-2">{candidate.appliedDate}</td>
+              <td className="border border-gray-300 p-2">{candidate.selectionStatus}</td>
             </tr>
           ))}
         </tbody>
