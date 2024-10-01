@@ -20,7 +20,7 @@ const Navbar = () => {
             <h1 className="text-xl font-bold text-gray-800">DRDO</h1>
           </div>
           <div className="flex items-center space-x-6">
-            <a href="/careers" className="text-gray-700 hover:text-blue-600">Careers</a>
+            <a href="/user/dashboard/careers" className="text-gray-700 hover:text-blue-600">Careers</a>
             <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
             <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
             <a href="/news" className="text-gray-700 hover:text-blue-600">News</a>
