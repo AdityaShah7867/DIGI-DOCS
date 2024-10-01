@@ -17,6 +17,7 @@ const Dashboard = () => {
 
   const router = useRouter();
   useEffect(() => {
+    fetchUserData()
     fetchDocuments()
   }, [])
 
@@ -24,9 +25,28 @@ const Dashboard = () => {
     router.push('/user/dashboard/careers')
   }
 
+  const fetchUserData = async () => {
+    try {
+      const token = localStorage.getItem('token'); // Assuming you store the token in localStorage
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/get/user`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const userData = await response.json();
+      console.log(userData)
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
   const fetchDocuments = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/getAll`, {
+      const response = await fetch('http://localhost:5000/api/document/getAll', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -70,10 +90,10 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold text-blue-800">Documents Uploaded</h2>
           <p className="text-3xl font-bold text-blue-600">{documentCount}</p>
         </div>
-        <button className="bg-green-50 p-4 text-start rounded-lg shadow" onClick={() => setIsApplicationModalOpen(true)}>
+        <b className="bg-green-50 p-4 rounded-lg shadow" onClick={() => setIsApplicationModalOpen(true)}>
           <h2 className="text-lg font-semibold text-green-800">Applications Submitted</h2>
           <p className="text-3xl font-bold text-green-600">{applicationCount}</p>
-        </button>
+        </b>
       </div>  
 
       <div className="mb-4 flex space-x-4">

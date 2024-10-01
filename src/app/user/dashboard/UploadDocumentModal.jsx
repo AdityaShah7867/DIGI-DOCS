@@ -8,6 +8,7 @@ const allDocumentTypes = [
   'EBC Certificate',
   'PWD Card',
   'Passport',
+  'Caste Certificate',
   'Other'
 ]
 
@@ -110,6 +111,7 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments, uploadedDocument
                  documentType === 'PWD Card' ? 'UDID Number' :
                  documentType === 'EBC Certificate' ? 'Bar code Number' :
                  documentType === 'Passport' ? 'Passport Number' :
+                 documentType === 'Caste Certificate' ? 'Caste Certificate Number' :
                  `${documentType} Value`}
               </label>
               <input
@@ -122,6 +124,7 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments, uploadedDocument
                    documentType === 'Aadhar Card' ? 'Enter Aadhar Number' :
                    documentType === 'PWD Card' ? 'Enter UDID Number' :
                    documentType === 'EBC Certificate' ? 'Enter Bar code Number' :
+                   documentType === 'Caste Certificate' ? 'Enter Caste Certificate Number' :
                    documentType === 'Passport' ? 'Enter Passport Number' :
                    `Enter ${documentType} Value`}
                 required
