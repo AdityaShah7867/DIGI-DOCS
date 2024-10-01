@@ -30,11 +30,15 @@ const CareerDetailsPage = () => {
             documents: data.career.documentName,
           });
           
-          // Note: The API response doesn't include applicants, so we'll keep the mock data for now
-          setCandidates([
-            { id: 1, name: "John Doe", email: "john@example.com", appliedDate: "2023-06-05" },
-            { id: 2, name: "Jane Smith", email: "jane@example.com", appliedDate: "2023-06-07" },
-          ]);
+          // Map the applicants data from the API response
+          const mappedCandidates = data.career.applicants.map(applicant => ({
+            id: applicant._id,
+            name: applicant.name || applicant.email.split('@')[0], // Use email if name is not available
+            email: applicant.email,
+            appliedDate: new Date(applicant.createdAt).toLocaleDateString(),
+          }));
+          
+          setCandidates(mappedCandidates);
         } else {
           console.error("Failed to fetch career details");
         }
@@ -47,7 +51,7 @@ const CareerDetailsPage = () => {
   }, [params.id]);
 
   const handleCandidateClick = (candidateId, candidateName) => {
-    router.push(`/admin/career/${params.id}/${candidateName}`);
+    router.push(`/admin/career/${params.id}/${candidateId}`);
   };
 
   if (!careerDetails) {

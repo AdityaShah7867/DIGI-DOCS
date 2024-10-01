@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 
@@ -9,18 +9,40 @@ const Page = () => {
   const [showActionModal, setShowActionModal] = useState(false);
   const [actionType, setActionType] = useState(null);
   const [message, setMessage] = useState('');
+  const [userData, setUserData] = useState(null);
+  const [careerData, setCareerData] = useState(null);
 
-  // Placeholder data - replace with actual data fetching
-  const userData = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    photo: '/path/to/photo.jpg',
-    appliedRole: 'Software Engineer',
-    documents: [
-      { id: 1, name: 'Resume.pdf', url: 'https://www.pancardapp.com/blog/wp-content/uploads/2019/04/sample-pan-card.jpg' },
-      { id: 2, name: 'Cover Letter.pdf', url: 'https://www.pancardapp.com/blog/wp-content/uploads/2019/04/sample-pan-card.jpg' },
-      { id: 3, name: 'Portfolio.pdf', url: 'https://www.pancardapp.com/blog/wp-content/uploads/2019/04/sample-pan-card.jpg' },
-    ],
+  useEffect(() => {
+    fetchUserData();
+    fetchCareerData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/users/get/${params.name}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      setUserData(data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const fetchCareerData = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/careerForm/getOne/${params.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      setCareerData(data.career);
+    } catch (error) {
+      console.error('Error fetching career data:', error);
+    }
   };
 
   const handlePreview = (document) => {
@@ -39,26 +61,34 @@ const Page = () => {
     setMessage('');
   };
 
+  if (!userData || !careerData) {
+    return <div>Loading...</div>;
+  }
+
+  const requiredDocuments = careerData.documentName;
+  const userDocuments = userData.uploadedDocs.filter(doc => 
+    doc.documentId && requiredDocuments.includes(doc.documentName)
+  );
+
   return (
     <div className='min-h-screen bg-white text-black p-8'>
       <h1 className='text-3xl font-bold mb-6'>Applicant Details</h1>
       
       <div className='flex items-center mb-6'>
-        <img src={userData.photo} alt={userData.name}  className='rounded-full mr-4' />
+        <div className='w-16 h-16 bg-gray-300 rounded-full mr-4'></div>
         <div>
-          <h2 className='text-2xl font-semibold'>{userData.name}</h2>
-          <p className='text-gray-600'>{userData.email}</p>
-          <p className='text-blue-600 font-medium'>Applied for: {userData.appliedRole}</p>
+          <h2 className='text-2xl font-semibold'>{userData.email}</h2>
+          <p className='text-blue-600 font-medium'>Applied for: {careerData.title}</p>
         </div>
       </div>
 
       <h3 className='text-xl font-semibold mb-4'>Uploaded Documents</h3>
       <ul className='space-y-2'>
-        {userData.documents.map((doc) => (
-          <li key={doc.id} className='flex items-center justify-between bg-gray-100 p-3 rounded'>
-            <span>{doc.name}</span>
+        {userDocuments.map((doc) => (
+          <li key={doc._id} className='flex items-center justify-between bg-gray-100 p-3 rounded'>
+            <span>{doc.documentName}</span>
             <button
-              onClick={() => handlePreview(doc)}
+              onClick={() => handlePreview(doc.documentId)}
               className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition'
             >
               Preview

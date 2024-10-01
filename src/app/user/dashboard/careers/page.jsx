@@ -17,7 +17,7 @@ const JobListings = () => {
 
     const fetchJobs = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/careerForm/getAll', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/getAll`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -33,7 +33,7 @@ const JobListings = () => {
             documents: job.documentName.join(', '),
             status: job.status,
             publishDate: job.publish_date,
-            appliedStatus: job.applicants.includes(storedUserId) ? 'Applied' : 'Not Applied'
+            appliedStatus: job.applicants.some(applicant => applicant._id === storedUserId) ? 'Applied' : 'Not Applied'
           }));
           setJobs(formattedJobs);
         }
