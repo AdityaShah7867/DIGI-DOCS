@@ -11,21 +11,14 @@ const documentTypes = [
   'Other'
 ]
 
-const UploadDocumentModal = ({ isOpen, onClose ,fetchDocuments}) => {
+const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments }) => {
   const [documentType, setDocumentType] = useState('')
-  const [documentDetails, setDocumentDetails] = useState({})
+  const [documentValue, setDocumentValue] = useState('')
   const [file, setFile] = useState(null)
 
   const handleDocumentTypeChange = (e) => {
     setDocumentType(e.target.value)
-    setDocumentDetails({})
-  }
-
-  const handleDetailsChange = (e) => {
-    setDocumentDetails({
-      ...documentDetails,
-      [e.target.name]: e.target.value
-    })
+    setDocumentValue('')
   }
 
   const handleSubmit = async (e) => {
@@ -34,8 +27,8 @@ const UploadDocumentModal = ({ isOpen, onClose ,fetchDocuments}) => {
     if (file) {
       const formData = new FormData()
       formData.append('document', file)
-      formData.append('documentName', documentType || '')
-      formData.append('fileName', documentDetails.name || '')
+      formData.append('documentType', documentType)
+      formData.append('value', documentValue)
 
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/create`, {
@@ -55,7 +48,7 @@ const UploadDocumentModal = ({ isOpen, onClose ,fetchDocuments}) => {
         fetchDocuments();
         // Reset form and close modal
         setDocumentType('')
-        setDocumentDetails({})
+        setDocumentValue('')
         setFile(null)
         onClose()
       } catch (error) {
@@ -64,117 +57,6 @@ const UploadDocumentModal = ({ isOpen, onClose ,fetchDocuments}) => {
       }
     } else {
       alert('Please select a file to upload.')
-    }
-  }
-
-  const renderDynamicFields = () => {
-    switch (documentType) {
-      case 'Aadhar Card':
-        return (
-          <>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={documentDetails.name || ''}
-              onChange={handleDetailsChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
-              required
-            />
-            <input
-              type="text"
-              name="aadharNumber"
-              placeholder="Aadhar Number"
-              value={documentDetails.aadharNumber || ''}
-              onChange={handleDetailsChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </>
-        )
-      case 'Pan Card':
-        return (
-          <>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={documentDetails.name || ''}
-              onChange={handleDetailsChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
-              required
-            />
-            <input
-              type="text"
-              name="panNumber"
-              placeholder="PAN Number"
-              value={documentDetails.panNumber || ''}
-              onChange={handleDetailsChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </>
-        )
-      case 'EBC Certificate':
-        return (
-          <input
-            type="text"
-            name="certificateNumber"
-            placeholder="Certificate Number"
-            value={documentDetails.certificateNumber || ''}
-            onChange={handleDetailsChange}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            required
-          />
-        )
-      case 'PWD Card':
-        return (
-          <>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={documentDetails.name || ''}
-              onChange={handleDetailsChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
-              required
-            />
-            <input
-              type="text"
-              name="udid"
-              placeholder="UDID"
-              value={documentDetails.udid || ''}
-              onChange={handleDetailsChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </>
-        )
-      case 'Passport':
-        return (
-          <>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={documentDetails.name || ''}
-              onChange={handleDetailsChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2"
-              required
-            />
-            <input
-              type="text"
-              name="fileNumber"
-              placeholder="File Number"
-              value={documentDetails.fileNumber || ''}
-              onChange={handleDetailsChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              required
-            />
-          </>
-        )
-      default:
-        return null
     }
   }
 
@@ -204,7 +86,18 @@ const UploadDocumentModal = ({ isOpen, onClose ,fetchDocuments}) => {
           </div>
           {documentType && (
             <div className="mb-4">
-              {renderDynamicFields()}
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="documentValue">
+                Document Value
+              </label>
+              <input
+                type="text"
+                id="documentValue"
+                value={documentValue}
+                onChange={(e) => setDocumentValue(e.target.value)}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder={`Enter ${documentType} value`}
+                required
+              />
             </div>
           )}
           <div className="mb-4">
