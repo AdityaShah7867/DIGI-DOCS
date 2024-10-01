@@ -1,116 +1,114 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'
+import UploadDocumentModal from './UploadDocumentModal'
 
 const Dashboard = () => {
-  const [documents, setDocuments] = useState([
-    { type: 'aadhar', name: 'Aadhar Card', docName: '' },
-    { type: 'pan', name: 'PAN Card', docName: '' },
-    { type: 'ebc', name: 'EBC Certificate', docName: '' },
-    { type: 'pwd', name: 'PWD Certificate', docName: '' },
-    { type: 'passport', name: 'Passport', docName: '' },
-    { type: 'gate', name: 'GATE Marksheet', docName: '' },
-  ]);
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [documents, setDocuments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  // Add new state variables for document and application counts
+  const [documentCount, setDocumentCount] = useState(0)
+  const [applicationCount, setApplicationCount] = useState(0)
 
-  const handleDocNameChange = (index, value) => {
-    const updatedDocuments = [...documents];
-    updatedDocuments[index].docName = value;
-    setDocuments(updatedDocuments);
-  };
+  useEffect(() => {
+    fetchDocuments()
+  }, [])
 
-  const handleFileUpload = (index, file) => {
-    const updatedDocuments = [...documents];
-    updatedDocuments[index].file = file;
-    setDocuments(updatedDocuments);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    for (const doc of documents) {  
-      if (doc.file) {
-        const formData = new FormData();
-        formData.append('document', doc.file);
-        // Change this line to use doc.docName instead of doc.name
-        formData.append('documentName', doc.docName);
-
-        try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/create`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: formData,
-          });
-
-          if (!response.ok) {
-            // Use doc.name for the alert message
-            alert(`Error uploading ${doc.name}. Please try again.`);
-            return;
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          // Use doc.name for the alert message
-          alert(`An error occurred while uploading ${doc.name}. Please try again.`);
-          return;
+  const fetchDocuments = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/document/getAll', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
-      }
-    }
+      })
 
-    alert('All documents uploaded successfully!');
-  };
+      if (!response.ok) {
+        throw new Error('Failed to fetch documents')
+      }
+
+      const data = await response.json()
+      setDocuments(data.documents)
+      console.log(data.documents)
+      // Update document and application counts
+      setDocumentCount(data.documents.length)
+      setApplicationCount(data.documents.filter(doc => doc.verified).length)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching documents:', error)
+      setError('Failed to load documents. Please try again later.')
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return <div className="text-center mt-8">Loading...</div>
+  }
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">{error}</div>
+  }
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen p-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2 text-center text-gray-800">Document Upload Dashboard</h1>
-        <p className="text-center text-gray-600 mb-8">Please upload your required documents below</p>
-        <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-lg p-8">
-          <ul className="space-y-6">
-            {documents.map((doc, index) => (
-              <li key={doc.type} className="flex flex-col sm:flex-row sm:items-center justify-between">
-                <div className="mb-2 sm:mb-0">
-                  <label htmlFor={`${doc.type}-name`} className="font-semibold text-gray-700">{doc.name}</label>
-                  <input
-                    type="text"
-                    id={`${doc.type}-name`}
-                    value={doc.docName}
-                    onChange={(e) => handleDocNameChange(index, e.target.value)}
-                    placeholder="Enter value"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                  />
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="file"
-                    id={`${doc.type}-file`}
-                    onChange={(e) => handleFileUpload(index, e.target.files[0])}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor={`${doc.type}-file`}
-                    className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out"
-                  >
-                    Choose File
-                  </label>
-                  <span className="ml-2 text-sm text-gray-600">
-                    {doc.file ? doc.file.name : 'No file chosen'}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-12 text-center">
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-            >
-              Upload All Documents
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+    <div className="container mx-auto p-4 bg-white text-gray-800">
+      <h1 className="text-2xl font-bold mb-4 text-gray-900">User Dashboard</h1>
 
-export default Dashboard;
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-blue-50 p-4 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-blue-800">Documents Uploaded</h2>
+          <p className="text-3xl font-bold text-blue-600">{documentCount}</p>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg shadow">
+          <h2 className="text-lg font-semibold text-green-800">Applications Submitted</h2>
+          <p className="text-3xl font-bold text-green-600">{applicationCount}</p>
+        </div>
+      </div>  
+
+      <div className="mb-4">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          Upload New Document
+        </button>
+      </div>
+
+      <h2 className="text-xl font-semibold mb-2 text-gray-900">Uploaded Documents</h2>
+      {documents.length === 0 ? (
+        <p>No documents uploaded yet.</p>
+      ) : (
+        <table className="w-full border-collapse border border-gray-300 bg-white">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 p-2 text-left">Document Name</th>
+              <th className="border border-gray-300 p-2 text-left">Upload Date</th>
+              <th className="border border-gray-300 p-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {documents.map((doc, index) => (
+              <tr key={doc._id || index}>
+                <td className="border border-gray-300 p-2">{doc.documentName || 'Unnamed Document'}</td>
+                <td className="border border-gray-300 p-2">
+                  {doc.createdAt
+                    ? new Date(doc.createdAt).toLocaleDateString()
+                    : 'Date not available'
+                  }
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <span className={`px-2 py-1 rounded ${doc.verified ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
+                    {doc.verified ? 'Verified' : 'Pending'}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      <UploadDocumentModal fetchDocuments={fetchDocuments} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onUploadSuccess={fetchDocuments} />
+    </div>
+  )
+}
+
+export default Dashboard
