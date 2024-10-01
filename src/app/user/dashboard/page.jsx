@@ -2,23 +2,28 @@
 import React, { useState, useEffect } from 'react'
 import UploadDocumentModal from './UploadDocumentModal'
 import { useRouter } from 'next/navigation'
+import ApplicationStatusModal from './ApplicationStatusModal.jsx'
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false)
   const [documents, setDocuments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   // Add new state variables for document and application counts
   const [documentCount, setDocumentCount] = useState(0)
   const [applicationCount, setApplicationCount] = useState(0)
-const router = useRouter();
+  const [uploadedDocumentTypes, setUploadedDocumentTypes] = useState([])
+
+  const router = useRouter();
   useEffect(() => {
     fetchDocuments()
   }, [])
 
-const handleApply = () => {
-  router.push('/user/dashboard/careers')
-}
+  const handleApply = () => {
+    router.push('/user/dashboard/careers')
+  }
+
   const fetchDocuments = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/document/getAll', {
@@ -37,6 +42,9 @@ const handleApply = () => {
       // Update document and application counts
       setDocumentCount(data.documents.length)
       setApplicationCount(data.documents.filter(doc => doc.verified).length)
+      // Update the uploadedDocumentTypes state
+      const uploadedTypes = data.documents.map(doc => doc.documentName  )
+      setUploadedDocumentTypes(uploadedTypes)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching documents:', error)
@@ -62,10 +70,10 @@ const handleApply = () => {
           <h2 className="text-lg font-semibold text-blue-800">Documents Uploaded</h2>
           <p className="text-3xl font-bold text-blue-600">{documentCount}</p>
         </div>
-        <div className="bg-green-50 p-4 rounded-lg shadow">
+        <button className="bg-green-50 p-4 text-start rounded-lg shadow" onClick={() => setIsApplicationModalOpen(true)}>
           <h2 className="text-lg font-semibold text-green-800">Applications Submitted</h2>
           <p className="text-3xl font-bold text-green-600">{applicationCount}</p>
-        </div>
+        </button>
       </div>  
 
       <div className="mb-4 flex space-x-4">
@@ -116,7 +124,18 @@ const handleApply = () => {
         </table>
       )}
 
-      <UploadDocumentModal fetchDocuments={fetchDocuments} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onUploadSuccess={fetchDocuments} />
+      <UploadDocumentModal 
+        fetchDocuments={fetchDocuments} 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onUploadSuccess={fetchDocuments}
+        uploadedDocumentTypes={uploadedDocumentTypes}  // Pass this new prop
+      />
+
+      <ApplicationStatusModal
+        isOpen={isApplicationModalOpen}
+        onClose={() => setIsApplicationModalOpen(false)}
+      />
     </div>
   )
 }

@@ -1,8 +1,8 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import toast from 'react-hot-toast'
 
-const documentTypes = [
+const allDocumentTypes = [
   'Aadhar Card',
   'Pan Card',
   'EBC Certificate',
@@ -11,10 +11,15 @@ const documentTypes = [
   'Other'
 ]
 
-const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments }) => {
+const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments, uploadedDocumentTypes }) => {
   const [documentType, setDocumentType] = useState('')
   const [documentValue, setDocumentValue] = useState('')
   const [file, setFile] = useState(null)
+
+  // Filter out already uploaded document types
+  const availableDocumentTypes = useMemo(() => {
+    return allDocumentTypes.filter(type => !uploadedDocumentTypes.includes(type))
+  }, [uploadedDocumentTypes])
 
   const handleDocumentTypeChange = (e) => {
     setDocumentType(e.target.value)
@@ -27,7 +32,7 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments }) => {
     if (file) {
       const formData = new FormData()
       formData.append('document', file)
-      formData.append('documentType', documentType)
+      formData.append('documentName', documentType)
       formData.append('value', documentValue)
 
       try {
@@ -78,16 +83,28 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments }) => {
               className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             >
-              <option value="">Select a document type</option>
-              {documentTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
+              <option value="" className='bg-gray-200'>Select a document type</option>
+              {allDocumentTypes.map((type) => (
+                <option 
+                  key={type} 
+                  value={type}
+                  className={uploadedDocumentTypes.includes(type) && type !== 'Other' ? 'bg-gray-200' : ''}
+                  disabled={uploadedDocumentTypes.includes(type) && type !== 'Other'}
+                >
+                  {type}{uploadedDocumentTypes.includes(type) && type !== 'Other' ? ' (Already Uploaded)' : ''}
+                </option>
               ))}
             </select>
           </div>
           {documentType && (
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="documentValue">
-                Document Value
+                {documentType === 'PAN Card' ? 'PAN Card Number' :
+                 documentType === 'Aadhar Card' ? 'Aadhar Number' :
+                 documentType === 'PWD Card' ? 'UDID Number' :
+                 documentType === 'EBC Certificate' ? 'Bar code Number' :
+                 documentType === 'Passport' ? 'Passport Number' :
+                 `${documentType} Value`}
               </label>
               <input
                 type="text"
@@ -95,7 +112,12 @@ const UploadDocumentModal = ({ isOpen, onClose, fetchDocuments }) => {
                 value={documentValue}
                 onChange={(e) => setDocumentValue(e.target.value)}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder={`Enter ${documentType} value`}
+                placeholder={documentType === 'PAN Card' ? 'Enter PAN Card Number' :
+                   documentType === 'Aadhar Card' ? 'Enter Aadhar Number' :
+                   documentType === 'PWD Card' ? 'Enter UDID Number' :
+                   documentType === 'EBC Certificate' ? 'Enter Bar code Number' :
+                   documentType === 'Passport' ? 'Enter Passport Number' :
+                   `Enter ${documentType} Value`}
                 required
               />
             </div>
