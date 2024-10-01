@@ -26,12 +26,12 @@ const Dashboard = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    for (const doc of documents) {
+    for (const doc of documents) {  
       if (doc.file) {
         const formData = new FormData();
-        // Change this line
         formData.append('document', doc.file);
-        formData.append(`${doc.type}Name`, doc.docName);
+        // Change this line to use doc.docName instead of doc.name
+        formData.append('documentName', doc.docName);
 
         try {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/create`, {
@@ -43,11 +43,13 @@ const Dashboard = () => {
           });
 
           if (!response.ok) {
+            // Use doc.name for the alert message
             alert(`Error uploading ${doc.name}. Please try again.`);
             return;
           }
         } catch (error) {
           console.error('Error:', error);
+          // Use doc.name for the alert message
           alert(`An error occurred while uploading ${doc.name}. Please try again.`);
           return;
         }
