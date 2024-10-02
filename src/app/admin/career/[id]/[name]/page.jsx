@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 const Page = () => {
@@ -11,6 +11,7 @@ const Page = () => {
   const [message, setMessage] = useState('');
   const [userData, setUserData] = useState(null);
   const [careerData, setCareerData] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchUserData();
@@ -54,11 +55,35 @@ const Page = () => {
     setShowActionModal(true);
   };
 
-  const submitAction = () => {
-    // TODO: Implement API call to submit action
-    console.log(`Applicant ${actionType}ed with message: ${message}`);
-    setShowActionModal(false);
-    setMessage('');
+  const submitAction = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/careerForm/change/${params.id}`, {
+        method: 'PUT  ',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          selectionStatus: actionType === 'accept' ? 'Selected' : 'Rejected'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update application status');
+      }
+
+      console.log(`Applicant ${actionType}ed with message: ${message}`);
+      setShowActionModal(false);
+      setMessage('');
+      
+      // Optionally, refresh the page or navigate back
+      router.refresh();
+      // or
+      // router.push('/admin/applications');
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      // Optionally, show an error message to the user
+    }
   };
 
   if (!userData || !careerData) {
@@ -101,7 +126,7 @@ const Page = () => {
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
           <div className='bg-white p-4 rounded-lg w-3/4 h-3/4'>
             <h4 className='text-xl font-semibold mb-4'>{previewDocument.documentName}</h4>
-            <iframe src={previewDocument.documentUrl} className='w-full h-5/6' />
+            <img src={previewDocument.documentUrl} className='w-1/2 h-auto' />
             <button
               onClick={() => setPreviewDocument(null)}
               className='mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition'

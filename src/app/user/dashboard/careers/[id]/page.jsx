@@ -2,6 +2,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { toast } from 'react-hot-toast'
 
 const Page = () => {
     const params = useParams()
@@ -10,6 +11,9 @@ const Page = () => {
     const [documents, setDocuments] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [uploadingDoc, setUploadingDoc] = useState(null)
+    // Add new state for document values
+    const [documentValues, setDocumentValues] = useState({})
 
     useEffect(() => {
         const fetchCareerForm = async () => {
@@ -47,10 +51,8 @@ const Page = () => {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/apply/${params.id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             })
-            if (response.status === 200) {
                 const router = useRouter()
                 router.push('/user/dashboard/careers')
-            }
             // Handle successful submission (e.g., show success message, redirect)
             console.log('Application submitted successfully')
         } catch (err) {
@@ -60,7 +62,54 @@ const Page = () => {
         }
     }
 
-    
+    const handleUpload = async (docName, file) => {
+        if (!documentValues[docName]) {
+            toast.error(`Please enter a value for ${docName} before uploading.`)
+            return
+        }
+
+        setUploadingDoc(docName)
+        const formData = new FormData()
+        formData.append('document', file)
+        formData.append('docType', docName)
+        formData.append('documentName', docName)
+        formData.append('value', documentValues[docName])
+
+        try {
+            const token = localStorage.getItem('token')
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/document/create`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            )
+
+            if (response.status === 200) {
+                toast.success(`${docName} uploaded successfully!`)
+                setDocuments(prevDocs => prevDocs.map(doc => 
+                    doc.name === docName ? {...doc, available: true} : doc
+                ))
+                const availableDocuments = JSON.parse(localStorage.getItem('documentNames') || '[]')
+                localStorage.setItem('documentNames', JSON.stringify([...availableDocuments, docName]))
+                // Clear the value for the uploaded document
+                setDocumentValues(prev => ({...prev, [docName]: ''}))
+            }
+        } catch (err) {
+            console.error('Error uploading document:', err)
+            toast.error(`Failed to upload ${docName}. Please try again.`)
+        } finally {
+            setUploadingDoc(null)
+        }
+    }
+
+    // Add this new function to handle value changes
+    const handleValueChange = (docName, value) => {
+        setDocumentValues(prev => ({...prev, [docName]: value}))
+    }
 
     const allDocumentsAvailable = documents.every(doc => doc.available)
 
@@ -80,6 +129,26 @@ const Page = () => {
                                 <span className={`ml-auto ${doc.available ? 'text-green-600' : 'text-red-600'}`}>
                                     {doc.available ? 'Available' : 'Missing'}
                                 </span>
+                                {!doc.available && (
+                                    <div className='ml-4 flex items-center'>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter value"
+                                            className="mr-2 p-1 border rounded"
+                                            value={documentValues[doc.name] || ''}
+                                            onChange={(e) => handleValueChange(doc.name, e.target.value)}
+                                        />
+                                        <label className='bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition duration-300 cursor-pointer'>
+                                            {uploadingDoc === doc.name ? 'Uploading...' : 'Upload'}
+                                            <input
+                                                type="file"
+                                                className="hidden"
+                                                onChange={(e) => handleUpload(doc.name, e.target.files[0])}
+                                                disabled={uploadingDoc === doc.name}
+                                            />
+                                        </label>
+                                    </div>
+                                )}
                             </li>
                         ))}
                     </ul>
