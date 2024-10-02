@@ -38,25 +38,29 @@ const AppliedJobDetails = () => {
     const careerDetails = applicationDetails?.careerId
 
     return (
-        <div className="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 border-b pb-2">{careerDetails?.title}</h1>
+        <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8  shadow-xl rounded-lg">
+            <h1 className="text-3xl font-bold mb-6 text-indigo-800 border-b border-indigo-200 pb-2">{careerDetails?.title}</h1>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <InfoSection title="Job Details">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <InfoSection title="Job Details" bgColor="bg-blue-100">
                     <InfoItem label="Category" value={careerDetails?.category} />
                     <InfoItem label="Status" value={careerDetails?.status} />
                     <InfoItem label="Publish Date" value={new Date(careerDetails?.publish_date).toLocaleDateString()} />
                     <InfoItem label="Last Date" value={new Date(careerDetails?.last_date).toLocaleDateString()} />
                 </InfoSection>
                 
-                <InfoSection title="Application Details">
-                    <InfoItem label="Selection Status" value={applicationDetails?.selectionStatus} />
+                <InfoSection title="Application Details" bgColor="bg-purple-100">
+                    <InfoItem 
+                        label="Selection Status" 
+                        value={applicationDetails?.selectionStatus}
+                        customStyle={getStatusStyle(applicationDetails?.selectionStatus)}
+                    />
                     <InfoItem label="Applied At" value={new Date(applicationDetails?.appliedAt).toLocaleString()} />
                     <InfoItem label="Message" value={applicationDetails?.message} />
                 </InfoSection>
             </div>
             
-            <InfoSection title="Required Documents">
+            <InfoSection title="Required Documents" bgColor="bg-green-100">
                 <ul className="list-disc list-inside">
                     {careerDetails?.documentName.map((doc, index) => (
                         <li key={index} className="text-gray-700">{doc}</li>
@@ -64,26 +68,39 @@ const AppliedJobDetails = () => {
                 </ul>
             </InfoSection>
             
-            <InfoSection title="Applicant Information">
+            <InfoSection title="Applicant Information" bgColor="bg-yellow-100">
                 <InfoItem label="Email" value={applicationDetails?.userId.email} />
             </InfoSection>
         </div>
     )
 }
 
-const InfoSection = ({ title, children }) => (
+const InfoSection = ({ title, children, bgColor }) => (
     <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-3 text-gray-700">{title}</h2>
-        <div className="bg-gray-50 p-4 rounded-lg">{children}</div>
+        <h2 className="text-2xl font-semibold mb-3 text-indigo-700">{title}</h2>
+        <div className={`${bgColor} p-4 rounded-lg shadow-md`}>{children}</div>
     </div>
 )
 
-const InfoItem = ({ label, value }) => (
+const InfoItem = ({ label, value, customStyle }) => (
     <div className="mb-2">
-        <span className="font-semibold text-gray-600">{label}:</span>{' '}
-        <span className="text-gray-800">{value}</span>
+        <span className="font-semibold text-gray-700">{label}:</span>{' '}
+        <span className={`text-gray-800 ${customStyle}`}>{value}</span>
     </div>
 )
+
+const getStatusStyle = (status) => {
+    switch (status?.toLowerCase()) {
+        case 'selected':
+            return 'text-green-600 font-bold';
+        case 'rejected':
+            return 'text-red-600 font-bold';
+        case 'pending':
+            return 'text-yellow-600 font-bold';
+        default:
+            return '';
+    }
+}
 
 const LoadingSpinner = () => (
     <div className="flex justify-center items-center h-screen">
