@@ -66,7 +66,7 @@ const Dashboard = () => {
       setDocumentCount(data.documents.length)
       setApplicationCount(data.documents.filter(doc => doc.verified).length)
       // Update the uploadedDocumentTypes state
-      const uploadedTypes = data.documents.map(doc => doc.documentName  )
+      const uploadedTypes = data.documents.map(doc => doc.documentName)
       setUploadedDocumentTypes(uploadedTypes)
       setLoading(false)
     } catch (error) {
@@ -99,33 +99,15 @@ const Dashboard = () => {
 
   const fetchApplications = async () => {
     // This is a placeholder. In a real application, you would fetch this data from your API
-    const mockApplications = [
-      {
-        id: 1,
-        name: "Software Engineer - Frontend",
-        appliedDate: "2024-03-15",
-        status: "Under Review"
-      },
-      {
-        id: 2,
-        name: "Data Analyst",
-        appliedDate: "2024-03-10",
-        status: "Interview Scheduled"
-      },
-      {
-        id: 3,
-        name: "Product Manager",
-        appliedDate: "2024-03-05",
-        status: "Rejected"
-      },
-      {
-        id: 4,
-        name: "UX Designer",
-        appliedDate: "2024-03-01",
-        status: "Accepted"
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/getAllApplications`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       }
-    ];
-    setApplications(mockApplications);
+    });
+    const data = await response.json();
+    console.log(data)
+    setApplications(data.applications)
+    
   };
 
   if (loading) {
@@ -149,7 +131,7 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold text-green-800">Applications Submitted</h2>
           <p className="text-3xl font-bold text-green-600">{applicationCount}</p>
         </b>
-      </div>  
+      </div>
 
       <div className="mb-4 flex space-x-4">
         <button
@@ -221,13 +203,13 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {applications.map((app) => (
-              <tr key={app.id}>
-                <td className="border border-gray-300 p-2">{app.name}</td>
-                <td className="border border-gray-300 p-2">{app.appliedDate}</td>
+            {applications.map((app, index) => (
+              <tr key={app._id || index}>
+                <td className="border border-gray-300 p-2">{app.careerId.title}</td>
+                <td className="border border-gray-300 p-2">{new Date(app.appliedAt).toISOString().split('T')[0]}</td>
                 <td className="border border-gray-300 p-2">
-                  <span className={`px-2 py-1 rounded ${getStatusColor(app.status)}`}>
-                    {app.status}
+                  <span className={`px-2 py-1 rounded ${getStatusColor(app.selectionStatus)}`}>
+                    {app.selectionStatus}
                   </span>
                 </td>
               </tr>
@@ -236,10 +218,10 @@ const Dashboard = () => {
         </table>
       )}
 
-      <UploadDocumentModal 
-        fetchDocuments={fetchDocuments} 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <UploadDocumentModal
+        fetchDocuments={fetchDocuments}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onUploadSuccess={fetchDocuments}
         uploadedDocumentTypes={uploadedDocumentTypes}
       />
@@ -256,7 +238,9 @@ const getStatusColor = (status) => {
       return "bg-blue-200 text-blue-800";
     case "Rejected":
       return "bg-red-200 text-red-800";
-    case "Accepted":
+      case "Accepted":
+        return "bg-green-200 text-green-800";
+    case "Selected":
       return "bg-green-200 text-green-800";
     default:
       return "bg-gray-200 text-gray-800";
