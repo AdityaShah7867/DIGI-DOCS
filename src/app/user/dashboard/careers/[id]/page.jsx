@@ -51,12 +51,20 @@ const Page = () => {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/apply/${params.id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             })
-                const router = useRouter()
-                router.push('/user/dashboard/careers')
-            // Handle successful submission (e.g., show success message, redirect)
-            console.log('Application submitted successfully')
+            
+            // Show success toast
+            toast.success('Application submitted successfully!')
+            
+            // Redirect to careers dashboard
+            const router = useRouter()
+            router.push('/user/dashboard/careers')
         } catch (err) {
-            setError('Failed to submit application')
+            if (err.response && err.response.data && err.response.data.message === "You have already applied for this career.") {
+                toast.error('You have already applied for this career.')
+            } else {
+                setError('Failed to submit application')
+                toast.error('Failed to submit application. Please try again.')
+            }
         } finally {
             setLoading(false)
         }
