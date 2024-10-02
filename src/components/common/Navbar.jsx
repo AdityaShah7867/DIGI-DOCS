@@ -17,11 +17,11 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    router.push('/'); // Redirect to home page after logout
     localStorage.removeItem('user');
     localStorage.removeItem('role');
     localStorage.removeItem('id');
     setRole(null);
-    router.push('/'); // Redirect to home page after logout
   };
 
   const handleDashboardRedirect = () => {

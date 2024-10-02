@@ -30,10 +30,10 @@ const CareerDetailsPage = () => {
             documents: data.career.documentName,
           });
           
-          // Map the applicants data from the API response
+          // Updated mapping for candidates
           const mappedCandidates = data.career.application.map(application => ({
-            id: application._id,
-            name: application.userId.email.split('@')[0], // Use email as name
+            id: application.userId._id, // Use applicant's ID instead of application ID
+            name: application.userId.email.split('@')[0],
             email: application.userId.email,
             appliedDate: new Date(application.appliedAt).toLocaleDateString(),
             selectionStatus: application.selectionStatus,

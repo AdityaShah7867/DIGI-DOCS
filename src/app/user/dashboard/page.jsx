@@ -20,8 +20,7 @@ const Dashboard = () => {
   const router = useRouter();
   useEffect(() => {
     fetchUserData()
-    fetchDocuments()
-    fetchApplications() // Add this line to fetch applications
+    fetchDocumentsAndApplications()
   }, [])
 
   const handleApply = () => {
@@ -47,34 +46,43 @@ const Dashboard = () => {
     fetchUserData();
   }, []);
 
-  const fetchDocuments = async () => {
+  const fetchDocumentsAndApplications = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/getAll`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      })
+      const [documentsResponse, applicationsResponse] = await Promise.all([
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/getAll`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/getAllApplications`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        })
+      ]);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch documents')
+      if (!documentsResponse.ok || !applicationsResponse.ok) {
+        throw new Error('Failed to fetch data');
       }
 
-      const data = await response.json()
-      setDocuments(data.documents)
-      console.log(data.documents)
-      // Update document and application counts
-      setDocumentCount(data.documents.length)
-      setApplicationCount(data.documents.filter(doc => doc.verified).length)
-      // Update the uploadedDocumentTypes state
-      const uploadedTypes = data.documents.map(doc => doc.documentName)
-      setUploadedDocumentTypes(uploadedTypes)
-      setLoading(false)
+      const documentsData = await documentsResponse.json();
+      const applicationsData = await applicationsResponse.json();
+
+      setDocuments(documentsData.documents);
+      setDocumentCount(documentsData.documents.length);
+      const uploadedTypes = documentsData.documents.map(doc => doc.documentName);
+      setUploadedDocumentTypes(uploadedTypes);
+
+      setApplications(applicationsData.applications);
+      setApplicationCount(applicationsData.applications.length);
+
+      setLoading(false);
     } catch (error) {
-      console.error('Error fetching documents:', error)
-      setError('Failed to load documents. Please try again later.')
-      setLoading(false)
+      console.error('Error fetching data:', error);
+      setError('Failed to load data. Please try again later.');
+      setLoading(false);
     }
-  }
+  };
 
   const deleteDocument = async (documentId) => {
     try {
@@ -90,24 +98,11 @@ const Dashboard = () => {
       }
 
       // Refresh the documents list after successful deletion
-      fetchDocuments();
+      fetchDocumentsAndApplications();
     } catch (error) {
       console.error('Error deleting document:', error);
       setError('Failed to delete document. Please try again later.');
     }
-  };
-
-  const fetchApplications = async () => {
-    // This is a placeholder. In a real application, you would fetch this data from your API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/careerForm/getAllApplications`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
-    const data = await response.json();
-    console.log(data)
-    setApplications(data.applications)
-    
   };
 
   if (loading) {
@@ -127,10 +122,10 @@ const Dashboard = () => {
           <h2 className="text-lg font-semibold text-blue-800">Documents Uploaded</h2>
           <p className="text-3xl font-bold text-blue-600">{documentCount}</p>
         </div>
-        <b className="bg-green-50 p-4 rounded-lg shadow">
+        <div className="bg-green-50 p-4 rounded-lg shadow">
           <h2 className="text-lg font-semibold text-green-800">Applications Submitted</h2>
           <p className="text-3xl font-bold text-green-600">{applicationCount}</p>
-        </b>
+        </div>
       </div>
 
       <div className="mb-4 flex space-x-4">
@@ -219,10 +214,10 @@ const Dashboard = () => {
       )}
 
       <UploadDocumentModal
-        fetchDocuments={fetchDocuments}
+        fetchDocuments={fetchDocumentsAndApplications}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onUploadSuccess={fetchDocuments}
+        onUploadSuccess={fetchDocumentsAndApplications}
         uploadedDocumentTypes={uploadedDocumentTypes}
       />
     </div>
