@@ -48,7 +48,7 @@ const Navbar = () => {
             {role && (
               <>
                 <a href={`/${role}/dashboard`} className="text-gray-700 hover:text-blue-600">Add Documents</a>
-                <a href={`/${role}/dashboard/careers`} className="text-gray-700 hover:text-blue-600">Careers</a>
+                <a href={`/${role}/career`} className="text-gray-700 hover:text-blue-600">Careers</a>
                 <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
                 <a href="/news" className="text-gray-700 hover:text-blue-600">News</a>
               </>
