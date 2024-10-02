@@ -47,7 +47,7 @@ const JobListings = () => {
   const categories = ['All', ...new Set(jobs.map(job => job.category))];
 
   const filteredJobs = jobs.filter(job => 
-    job.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    job?.title?.toLowerCase()?.includes(searchTerm.toLowerCase()) &&
     (filterCategory === 'All' || job.category === filterCategory)
   );
 
