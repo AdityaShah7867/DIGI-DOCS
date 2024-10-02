@@ -207,7 +207,7 @@ const Dashboard = () => {
               <tr key={app._id || index} 
                   onClick={() => handleApplicationClick(app._id)}
                   className="cursor-pointer hover:bg-gray-50">
-                <td className="border border-gray-300 p-2">{app.careerId.title}</td>
+                <td className="border border-gray-300 p-2">{app.careerId?.title}</td>
                 <td className="border border-gray-300 p-2">{new Date(app.appliedAt).toISOString().split('T')[0]}</td>
                 <td className="border border-gray-300 p-2">
                   <span className={`px-2 py-1 rounded ${getStatusColor(app.selectionStatus)}`}>
