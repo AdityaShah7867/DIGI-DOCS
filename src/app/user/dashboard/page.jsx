@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import UploadDocumentModal from './UploadDocumentModal'
 import { useRouter } from 'next/navigation'
 import ApplicationStatusModal from './ApplicationStatusModal.jsx'
+import { FaTrash } from 'react-icons/fa'; // Import the trash icon
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -73,6 +74,27 @@ const Dashboard = () => {
     }
   }
 
+  const deleteDocument = async (documentId) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/delete/${documentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      // Refresh the documents list after successful deletion
+      fetchDocuments();
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      setError('Failed to delete document. Please try again later.');
+    }
+  };
+
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>
   }
@@ -121,6 +143,7 @@ const Dashboard = () => {
               <th className="border border-gray-300 p-2 text-left">Document Name</th>
               <th className="border border-gray-300 p-2 text-left">Upload Date</th>
               <th className="border border-gray-300 p-2 text-left">Status</th>
+              <th className="border border-gray-300 p-2 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -137,6 +160,14 @@ const Dashboard = () => {
                   <span className={`px-2 py-1 rounded ${doc.verified ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
                     {doc.verified}
                   </span>
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <button
+                    onClick={() => deleteDocument(doc._id)}
+                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
+                  >
+                    <FaTrash />
+                  </button>
                 </td>
               </tr>
             ))}
