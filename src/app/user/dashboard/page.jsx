@@ -105,6 +105,11 @@ const Dashboard = () => {
     }
   };
 
+  const handleApplicationClick = (applicationId) => {
+    const applicationNames = applications.map(app => app.careerId.title);
+    router.push(`/user/applied/${applicationId}`);
+  };
+
   if (loading) {
     return <div className="text-center mt-8">Loading...</div>
   }
@@ -199,7 +204,9 @@ const Dashboard = () => {
           </thead>
           <tbody>
             {applications.map((app, index) => (
-              <tr key={app._id || index}>
+              <tr key={app._id || index} 
+                  onClick={() => handleApplicationClick(app._id)}
+                  className="cursor-pointer hover:bg-gray-50">
                 <td className="border border-gray-300 p-2">{app.careerId.title}</td>
                 <td className="border border-gray-300 p-2">{new Date(app.appliedAt).toISOString().split('T')[0]}</td>
                 <td className="border border-gray-300 p-2">

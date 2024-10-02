@@ -67,7 +67,7 @@ import { CheckCircle, Loader2 } from 'lucide-react';const Page = () => {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/get/${params.name}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/get/${params.name}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -146,7 +146,8 @@ import { CheckCircle, Loader2 } from 'lucide-react';const Page = () => {
         },
         body: JSON.stringify({
           selectionStatus: actionType === 'accept' ? 'Selected' : 'Rejected',
-          applicationId: applicationId // Add this line
+          applicationId: applicationId,
+          message: message // Include the message in the request body
         })
       });
 
