@@ -4,7 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/common/Navbar";
 import { useEffect } from 'react';
 import { Toaster } from "react-hot-toast";
-
+import Script from 'next/script';  // Import Script to handle script injections
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -16,8 +16,6 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
-
-
 
 export default function RootLayout({ children }) {
   useEffect(() => {
@@ -50,6 +48,33 @@ export default function RootLayout({ children }) {
       >
         <Navbar />
         <Toaster position="top-center" />
+        
+        {/* Add the gtranslate wrapper div */}
+        <div className="gtranslate_wrapper" style={{ position: 'fixed', bottom: '20px', right: '20px' }}></div>
+        
+        {/* Add the gtranslate settings script */}
+        <Script id="gtranslate-settings" strategy="afterInteractive">
+          {`
+            window.gtranslateSettings = {
+              default_language: "en",
+              languages: ["en", "gu", "mr", "ta", "ml", "hi"],
+              wrapper_selector: ".gtranslate_wrapper",
+              switcher_horizontal_position: "left",
+              switcher_vertical_position: "bottom",
+              float_switcher_open_direction: "top",
+              flag_style: "3d",
+              dropdown_languages: ["en", "gu", "mr", "ta", "ml", "hi"]
+            };
+          `}
+        </Script>
+
+        {/* Add the external gtranslate script */}
+        <Script 
+          src="https://cdn.gtranslate.net/widgets/latest/float.js" 
+          strategy="lazyOnload" 
+          defer 
+        />
+        
         {children}
       </body>
     </html>
