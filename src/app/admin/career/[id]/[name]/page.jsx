@@ -48,9 +48,9 @@ import { CheckCircle, Loader2 } from 'lucide-react';const Page = () => {
   };
   const simulateVerificationProcess = () => {
     const steps = [
-      { step: 1, delay: 3000 },
-      { step: 2, delay: 3000 },
-      { step: 3, delay: 3000 },
+      { step: 1, delay: 1000 },
+      { step: 2, delay: 1000 },
+      { step: 3, delay: 1000 },
     ];
   
     setVerificationStep(1); // Start with step 1
