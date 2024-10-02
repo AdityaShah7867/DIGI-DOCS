@@ -16,10 +16,10 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token', data.token);
-    localStorage.removeItem('user', JSON.stringify(data.user));
-    localStorage.removeItem('role', data.user.role);
-    localStorage.removeItem('id', data.user.id);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role');
+    localStorage.removeItem('id');
     setRole(null);
     router.push('/'); // Redirect to home page after logout
   };

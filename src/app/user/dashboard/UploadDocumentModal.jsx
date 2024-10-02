@@ -9,6 +9,8 @@ const allDocumentTypes = [
   'PWD Card',
   'Passport',
   'Caste Certificate',
+  '10th Marksheet',
+  '12th Marksheet',
   'Other'
 ]
 
