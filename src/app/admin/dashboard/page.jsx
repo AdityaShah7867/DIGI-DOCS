@@ -25,11 +25,11 @@ const AdminDashboard = () => {
     // Fetch applications per day data (you'll need to implement this API endpoint)
     // For now, we'll keep the mock data
     setApplicationsPerDay([
-      { x: '2023-05-01', y: 5 },
-      { x: '2023-05-02', y: 7 },
-      { x: '2023-05-03', y: 3 },
-      { x: '2023-05-04', y: 8 },
-      { x: '2023-05-05', y: 10 },
+      { x: '2023-10-01', y: 5 },
+      { x: '2023-10-02', y: 7 },
+      { x: '2023-10-03', y: 3 },
+      { x: '2023-10-04', y: 8 },
+      { x: '2023-10-05', y: 10 },
     ])
   }, [])
 

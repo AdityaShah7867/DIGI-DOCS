@@ -10,6 +10,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -30,7 +31,13 @@ const Login = () => {
         localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('role', data.user.role);
         localStorage.setItem('id', data.user.id);
-        router.push('/user/dashboard');
+        
+        // Redirect based on the checkbox
+        if (isAdmin) {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/user/dashboard');
+        }
       } else {
         const errorData = await response.json();
         console.error('Login failed:', errorData);
@@ -116,6 +123,20 @@ const Login = () => {
                   {showPassword ? <FaEyeSlash className="h-5 w-5 text-gray-500" /> : <FaEye className="h-5 w-5 text-gray-500" />}
                 </button>
               </div>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                id="adminCheckbox"
+                name="adminCheckbox"
+                type="checkbox"
+                checked={isAdmin}
+                onChange={(e) => setIsAdmin(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="adminCheckbox" className="ml-2 block text-sm text-gray-900">
+                Sign in as Admin
+              </label>
             </div>
 
             <div>
