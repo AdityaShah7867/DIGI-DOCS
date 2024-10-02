@@ -46,7 +46,7 @@ const Dashboard = () => {
 
   const fetchDocuments = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/document/getAll', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/document/getAll`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -135,7 +135,7 @@ const Dashboard = () => {
                 </td>
                 <td className="border border-gray-300 p-2">
                   <span className={`px-2 py-1 rounded ${doc.verified ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}`}>
-                    {doc.verified ? 'Verified' : 'Pending'}
+                    {doc.verified}
                   </span>
                 </td>
               </tr>

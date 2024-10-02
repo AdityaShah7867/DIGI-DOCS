@@ -45,6 +45,7 @@ const Navbar = () => {
             <a href="#" onClick={handleDashboardRedirect} className="text-xl font-bold text-gray-800">DRDO</a>
           </div>
           <div className="flex items-center space-x-6">
+            <a href="/user/dashboard" className="text-gray-700 hover:text-blue-600">Add Documents</a>
             <a href="/user/dashboard/careers" className="text-gray-700 hover:text-blue-600">Careers</a>
             <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
             <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
