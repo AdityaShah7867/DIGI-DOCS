@@ -27,7 +27,7 @@ const Navbar = () => {
   const handleDashboardRedirect = () => {
     if (role === 'admin') {
       router.push('/admin/dashboard');
-    } else {
+    } else if (role === 'user') {
       router.push('/user/dashboard');
     }
   };
@@ -45,11 +45,14 @@ const Navbar = () => {
             <a href="#" onClick={handleDashboardRedirect} className="text-xl font-bold text-gray-800">DRDO</a>
           </div>
           <div className="flex items-center space-x-6">
-            <a href="/user/dashboard" className="text-gray-700 hover:text-blue-600">Add Documents</a>
-            <a href="/user/dashboard/careers" className="text-gray-700 hover:text-blue-600">Careers</a>
-            <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
-            <a href="/contact" className="text-gray-700 hover:text-blue-600">Contact</a>
-            <a href="/news" className="text-gray-700 hover:text-blue-600">News</a>
+            {role && (
+              <>
+                <a href={`/${role}/dashboard`} className="text-gray-700 hover:text-blue-600">Add Documents</a>
+                <a href={`/${role}/dashboard/careers`} className="text-gray-700 hover:text-blue-600">Careers</a>
+                <a href="/about" className="text-gray-700 hover:text-blue-600">About</a>
+                <a href="/news" className="text-gray-700 hover:text-blue-600">News</a>
+              </>
+            )}
             {role ? (
               <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300" onClick={handleLogout}>
                 Logout
