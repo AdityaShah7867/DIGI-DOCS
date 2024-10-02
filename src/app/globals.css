@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Example CSS to customize the flag buttons */
+
+/* Target the flag container */
+.gtranslate_wrapper .gtranslate-flags {
+    display: flex; /* Align the flags horizontally */
+    justify-content: center; /* Center the flags */
+    gap: 8px; /* Add spacing between the flags */
+    padding: 10px; /* Add padding to the flags area */
+  }
+  
+  /* Customize the flags */
+  .gtranslate_wrapper .gtranslate-flags img {
+    width: 100px; /* Adjust the size of the flags */
+    height: auto; /* Keep the aspect ratio */
+    border-radius: 50%; /* Make the flags circular */
+    transition: transform 0.3s ease; /* Add a smooth hover effect */
+  }
+  
+  /* Hover effect on flags */
+  .gtranslate_wrapper .gtranslate-flags img:hover {
+    transform: scale(1.1); /* Slightly enlarge the flag on hover */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Add a subtle shadow on hover */
+  }
+  
+  /* Optional: Customize the flag container background */
+  .gtranslate_wrapper {
+    background-color: rgba(255, 255, 255, 0.8); /* Add semi-transparent background */
+    border-radius: 8px; /* Make the container corners rounded */
+    padding: 5px;
+  }
+  
